@@ -107,6 +107,37 @@ def fftGauss(in_arrayOriginal, kernel_size):
     else:
         return in_arrayOriginal, 0, 0
 
+
+def fftGauss1D(signal, cutoff_freq):
+    # Compute the 1D FFT of the signal
+    fft_signal = np.fft.fft(signal)
+
+    # Create a frequency domain representation
+    freq = np.fft.fftfreq(len(signal))
+
+    # Apply a low-pass filter by zeroing out the high-frequency components
+    fft_signal[np.abs(freq) > cutoff_freq] = 0
+
+    # Compute the inverse FFT to obtain the filtered signal
+    filtered_signal = np.fft.ifft(fft_signal)
+
+    # Return the real part of the filtered signal (ignoring imaginary part)
+    return np.real(filtered_signal)
+
+
+def movingAverage(arr, window_size):
+    # Pad the array at the beginning and end with zeros
+    padded_arr = np.pad(arr, (window_size // 2, window_size // 2), mode='edge')
+
+    # Create a sliding window view of the padded array
+    window_view = np.lib.stride_tricks.sliding_window_view(padded_arr, window_shape=(window_size,))
+
+    # Compute the average along the window axis
+    smoothed_arr = np.mean(window_view, axis=1)
+
+    return smoothed_arr
+
+
 def maxPosCm(in_array, smooth=40, threshold=0.6):
     '''
         Find maximum of the 2d array by finding the center of
