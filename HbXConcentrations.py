@@ -91,7 +91,8 @@ def ref_homo(ua, ups, rho, n, d, m):
     return y
 
 
-def MamoRef_dHbX(im, lambdas, srcPos, cropSizeX=100, cropSizeY=100, ua=0.01, ups=1):
+def MamoRef_dHbX(im, lambdas, srcPos, cropSizeX=100, cropSizeY=100, ua=0.01, ups=1, spectraData1="hbo.dat",
+                 spectraData2="hbr.dat", concentration1=1, concentration2=1):
     '''Esta función toma como entrada un "stack" de imágenes de X x Y x lambdas 
     y las longitudes de onda especificadas como un vector de 1xlambdas (vector fila)
 
@@ -110,9 +111,11 @@ def MamoRef_dHbX(im, lambdas, srcPos, cropSizeX=100, cropSizeY=100, ua=0.01, ups
 
     # Búsqueda de lambdas
     # así como está, me quedo con la primera y la tercera. Se puede hacer más versátil.
-    lambdas = lambdas[0], lambdas[2]
+    # lambdas = lambdas[0], lambdas[2]
     # Tomo las absorciones de las especies HbO y HbR para estas longitudes de onda.
-    E = getspectra(lambdas)
+    E = getspectra(lambdas, spectraData1, spectraData2,
+                   concentration1, concentration2)
+    
     # Hay que controlar que esta matriz no esté traspuesta. (Ahora no lo está.)
 
     # Propiedades ópticas. Habría que manejar esto desde afuera.
@@ -141,20 +144,20 @@ def MamoRef_dHbX(im, lambdas, srcPos, cropSizeX=100, cropSizeY=100, ua=0.01, ups
     LL = np.zeros((sizeX, sizeY))
 
     cont = np.zeros((sizeX, sizeY))
-    
+
     print("Step 2/2...")
-    for iC in tqdm(srcPos[:,1]):
-        for jC in srcPos[:,0]:
+    for iC in tqdm(srcPos[:, 1]):
+        for jC in srcPos[:, 0]:
             iC = int(iC)
             jC = int(jC)
-            #LL[int(i-cropSizeX/2):int(i+cropSizeX/2), int(j-cropSizeY/2):int(j+cropSizeY/2)] += L
-            #cont[int(i-cropSizeX/2):int(i+cropSizeX/2), int(j - cropSizeY/2):int(j+cropSizeY/2)] += 1
+            # LL[int(i-cropSizeX/2):int(i+cropSizeX/2), int(j-cropSizeY/2):int(j+cropSizeY/2)] += L
+            # cont[int(i-cropSizeX/2):int(i+cropSizeX/2), int(j - cropSizeY/2):int(j+cropSizeY/2)] += 1
             # TODO: more efficient?
             for i in np.arange(-int(cropSizeX/2), int(cropSizeX/2)):
                 for j in np.arange(-int(cropSizeY/2), int(cropSizeY/2)):
-                    if iC+i > 0 and iC+i < sizeX and jC+j > 0 and jC+j < sizeY: 
-                        LL[iC+i, jC+j] += L[i,j]
-                        cont[iC+i, jC+j] += 1         
+                    if iC+i > 0 and iC+i < sizeX and jC+j > 0 and jC+j < sizeY:
+                        LL[iC+i, jC+j] += L[i, j]
+                        cont[iC+i, jC+j] += 1
 
     LL = LL/cont
 
@@ -166,7 +169,8 @@ def MamoRef_dHbX(im, lambdas, srcPos, cropSizeX=100, cropSizeY=100, ua=0.01, ups
 
     return res
 
-def getspectra(lambdas):
+
+def getspectra(lambdas, spectraData1="hbo.dat", spectraData2="hbr.dat", concentration1=1, concentration2=1):
     #
     #   # # Hemoglobin
     # # http://omlc.ogi.edu/spectra/hemoglobin/
@@ -180,12 +184,15 @@ def getspectra(lambdas):
     # # D. J. Segelstein, "The complex refractive index of water," University of
     # # Missouri-Kansas City, (1981).
     import numpy as np
-    hbo = np.loadtxt('hbo.dat')
-    hbr = np.loadtxt('hbr.dat')
-    # fat = importdata('fat.dat', ' ', 0)
-    # water = importdata('water.dat', ' ', 0)
-
+    chromo1 = np.loadtxt(spectraData1)
+    chromo2 = np.loadtxt(spectraData2)
+    
+    chromo1[:,1] = chromo1[:,1]/concentration1
+    chromo2[:,1] = chromo2[:,1]/concentration2
+    
     out = np.zeros((2, 2))
-    out[:, 0] = np.interp(lambdas, hbo[:, 0], hbo[:, 1])       # HbO extinction
-    out[:, 1] = np.interp(lambdas, hbr[:, 0], hbr[:, 1])       # HbR extinction
+    out[:, 0] = np.interp(lambdas, chromo1[:, 0],
+                          chromo1[:, 1])       # HbO extinction
+    out[:, 1] = np.interp(lambdas, chromo2[:, 0],
+                          chromo2[:, 1])       # HbR extinction
     return out
