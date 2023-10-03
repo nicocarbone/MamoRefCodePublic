@@ -235,3 +235,7 @@ def recon2D(images, centers, weights=[], method="mean"):
     if method == "median":
         imageRecon = np.nanmedian(imageReconTemp, axis=0)
         return imageRecon, []
+    
+def O2Sat (HbOCon, HbRCon):
+    O2SatPerc = np.round(HbOCon/(HbOCon+HbRCon)*100)
+    return O2SatPerc
