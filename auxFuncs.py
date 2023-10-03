@@ -237,5 +237,7 @@ def recon2D(images, centers, weights=[], method="mean"):
         return imageRecon, []
     
 def O2Sat (HbOCon, HbRCon):
+    if HbOCon < 0: HbOCon = 0
+    if HbRCon < 0: HbRCon = 0
     O2SatPerc = np.round(HbOCon/(HbOCon+HbRCon)*100)
     return O2SatPerc
