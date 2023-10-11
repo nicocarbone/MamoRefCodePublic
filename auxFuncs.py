@@ -241,3 +241,15 @@ def O2Sat (HbOCon, HbRCon):
     if HbRCon < 0: HbRCon = 0
     O2SatPerc = np.round(HbOCon/(HbOCon+HbRCon)*100)
     return O2SatPerc
+
+def FWHM(X,Y):
+    #https://stackoverflow.com/questions/10582795/finding-the-full-width-half-maximum-of-a-peak
+    half_max = max(Y) / 2.
+    #find when function crosses line half_max (when sign of diff flips)
+    #take the 'derivative' of signum(half_max - Y[])
+    d = np.sign(half_max - np.array(Y[0:-1])) - np.sign(half_max - np.array(Y[1:]))
+    #plot(X[0:len(d)],d) #if you are interested
+    #find the left and right most indexes
+    left_idx = np.where(d > 0)[0]
+    right_idx = np.where(d < 0)[-1]
+    return X[right_idx] - X[left_idx] #return the difference (full width)
