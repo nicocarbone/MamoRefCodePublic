@@ -173,7 +173,7 @@ def maxPosCm(in_array, smooth=40, threshold=0.6):
         return[int((cm[1])), int((cm[0]))]
 
 
-def recon2D(images, centers, weights=[], method="mean"):
+def recon2D(images, centers, weights=[], method="mean", reconShape=[0,0]):
     '''
     Topografic 2D reconstrucion
     
@@ -187,7 +187,8 @@ def recon2D(images, centers, weights=[], method="mean"):
     xSize,ySize = np.shape(images[0])
     
     maxCenters = int(np.amax(centers))  
-    reconShape = (np.shape(images[0])[0]+maxCenters - int(xSize/2), np.shape(images[0])[1]+maxCenters- int(ySize/2)) #TODO: Can be improved...
+    if reconShape[0] == 0 or reconShape[1] == 0:
+        reconShape = (np.shape(images[0])[0]+maxCenters - int(xSize/2), np.shape(images[0])[1]+maxCenters- int(ySize/2)) #TODO: Can be improved...
     
     imageReconBackLevel = 0
 
